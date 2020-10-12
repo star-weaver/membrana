@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<declare-styleable name = "com.mycompany.myapp35">
+<attr name="shadow" format="boolean" />
+<attr name="monochrome" format="boolean" />
+</declare-styleable>
+</resources>

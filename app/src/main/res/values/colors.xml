@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<color name="chart_color">#509C4E</color>
+<color name="transparent">#000000</color>
+<color name="status_bar_color">#666666</color>
+<color name="color_primary">#ff888888</color>
+<color name="bottom_navigation_item_background_colors">#333212</color>
+<color name="bottom_navigation_item">#ffffffff</color>
+<color name="magic_magenta">#00ffffff</color>
+</resources>
