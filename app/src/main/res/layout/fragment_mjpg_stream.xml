@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/LinearLayout1"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context="yjkim.android_simple_mjpegviewer.FragmentMjpgStream"
+>
+
+<yjkim.mjpegviewer.MjpegView
+android:id="@+id/mjpgView" 
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+/>
+
+</LinearLayout>
+
+<!--?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="#883365ff"
+android:orientation="vertical"
+tools:context="yjkim.android_simple_mjpegviewer.Implement">
+-->
+<!--
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:gravity="center"
+tools:context="yjkim.android_simple_mjpegviewer.MainActivity">
+>
+-->
+
+<!--yjkim.mjpegviewer.MjpegView
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:id="@+id/mjpgView" 
+/-->
+
+<!--/LinearLayout-->

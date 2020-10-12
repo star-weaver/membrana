@@ -1,0 +1,65 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:gif="http://schemas.android.com/apk/res-auto"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:background="@drawable/astral_fragment_1"
+android:orientation="vertical">
+
+<Button
+android:id="@+id/button_test_fragment_1"
+android:layout_width="100dp"
+android:layout_height="100dp"
+android:layout_centerHorizontal="true"
+android:layout_alignParentTop="true"
+/>
+
+<FrameLayout
+android:id="@+id/emitter"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:layout_alignParentTop="true"
+android:layout_alignTop="@id/button_test_fragment_1" android:layout_alignBottom="@id/button_test_fragment_1"
+android:layout_alignLeft="@id/button_test_fragment_1" android:layout_alignRight="@id/button_test_fragment_1"
+/>
+
+<!--com.mycompany.myapp35.TriangleImageView
+android:id="@+id/myshad"
+android:layout_width="300px"
+android:layout_height="300px"
+android:layout_centerInParent="true"
+gif:shadow="false"
+/>
+
+<com.mycompany.myapp35.TriangleImageView
+android:id="@+id/mytri"
+android:layout_width="300px"
+android:layout_height="300px"
+android:layout_centerInParent="true"
+gif:shadow="true"
+android:layout_alignTop="@id/myshad" android:layout_alignBottom="@id/myshad"
+android:layout_alignLeft="@id/myshad" android:layout_alignRight="@id/myshad"
+/-->
+
+</RelativeLayout>
+<!--?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@drawable/astral_fragment_1"
+android:gravity="center_horizontal"
+android:orientation="vertical">
+
+<Button
+android:id="@+id/button_test_fragment_1"
+android:layout_width="100dp"
+android:layout_height="100dp"
+/>
+
+<FrameLayout
+android:id="@+id/emitter"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+/>
+
+</LinearLayout-->
