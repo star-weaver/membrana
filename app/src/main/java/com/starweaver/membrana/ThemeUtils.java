@@ -1,4 +1,4 @@
-package com.mycompany.myapp81;
+package com.starweaver.membrana;
 
 import android.app.Activity;
 import android.content.Intent;
