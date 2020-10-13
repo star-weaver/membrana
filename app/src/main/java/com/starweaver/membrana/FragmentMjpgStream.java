@@ -1,4 +1,4 @@
-package com.mycompany.myapp81;
+package com.starweaver.membrana;
 /*
 this is another FragmentMjpgStream
 than in the "unused" folder: two
