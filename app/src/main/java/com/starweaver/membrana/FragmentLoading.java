@@ -1,4 +1,4 @@
-package com.mycompany.myapp81;
+package com.starweaver.membrana;
 
 //https://androidexample365.com/a-collection-of-nice-loading-animations-for-android/amp/
 //https://www.tutorialspoint.com/android/android_loading_spinner.htm
