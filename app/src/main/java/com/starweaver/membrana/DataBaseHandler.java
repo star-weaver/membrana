@@ -12,14 +12,11 @@ public class DataBaseHandler extends SQLiteOpenHelper
 Context context;
 private ImplementInRobot implementInRobotListener;
 private static TreeNode temporaryTreeNode;
-private static final String strSeparator = "__,__";//NEED DELETE???
+//private static final String strSeparator = "__,__";//NEED DELETE???
 private static final int DATABASE_VERSION = 1;
-private static final String DATABASE_NAME = "treeNodesDataBase002";
-private static final String TABLE_NAME = "treeNodesDataTable002";
+private static final String DATABASE_NAME = "treeNodesDataBase003";
+private static final String TABLE_NAME = "treeNodesDataTable003";
 private static final String KEY_ID = "id";
-//private static final String KEY_NAME = "name";
-//private static final String KEY_PH_NO = "phone_number";
-//--
 private static final String KEY_IERARCHICAL_NAME = "ierarchicalName";
 private static final String KEY_ENVIRONMENT_NAME = "environmentName";
 private static final String KEY_ENVIRONMENT_PICTURE = "environmentPicture";
@@ -31,7 +28,8 @@ private static final String KEY_CHILDREN_NAMES_ARRAY_STRING = "childrenNamesArra
 private static final String KEY_BUTTON_STATE_INT = "buttonStateInt";
 private static final String KEY_MULTISENSOR_ARRAY_POSITION = "multisensorArrayPosition";
 private static final String KEY_NODE_TYPE = "nodeType";
-static String[] savedTreeNodeAttributesFromDataBaseReturnStringArray = new String[10];
+private static final String KEY_VIDEO_SOURCE_URL = "videoSourceUrl";
+static String[] savedTreeNodeAttributesFromDataBaseReturnStringArray = new String[11];
 private static ArrayList<String> temporaryDevicesNamesArraylist = new ArrayList<String>();
 private static ArrayList<String> temporaryDevicesPicturesArraylist = new ArrayList<String>();
 private static ArrayList<String> temporaryDevicesPatternsArraylist = new ArrayList<String>();
@@ -39,8 +37,6 @@ private static ArrayList<String> temporaryChildrenNamesArraylist = new ArrayList
 private static JsonParser jsonParser;
 private static JsonElement jsonElement;
 private static JsonArray jsonArray;
-//--
-//private static final String KEY_JSONSTRING = "tree_nodes_array_list_json_string";
 
 public DataBaseHandler(Context context, ImplementInRobot implementInRobotListener) 
 {
@@ -72,11 +68,6 @@ return checkDB != null;
 @Override
 public void onCreate(SQLiteDatabase db) 
 {
-/*String CREATED_TABLE = "CREATE TABLE " + TABLE_NAME + "("
-+ KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-+ KEY_PH_NO + " TEXT" + ")";
-db.execSQL(CREATED_TABLE);*/
-//
 String CREATED_TABLE = "CREATE TABLE " + TABLE_NAME + "("
 + KEY_ID + " INTEGER PRIMARY KEY," 
 + KEY_IERARCHICAL_NAME + " TEXT," 
@@ -87,14 +78,10 @@ String CREATED_TABLE = "CREATE TABLE " + TABLE_NAME + "("
 + KEY_DEVICES_PATTERNS_ARRAY_STRING + " TEXT,"
 + KEY_CHILDREN_NAMES_ARRAY_STRING + " TEXT,"
 + KEY_BUTTON_STATE_INT + " INT," 
-+ KEY_MULTISENSOR_ARRAY_POSITION  + " INT,"  
-+ KEY_NODE_TYPE  + " INT" + ")";
++ KEY_MULTISENSOR_ARRAY_POSITION  + " INT,"
++ KEY_NODE_TYPE  + " INT,"
++ KEY_VIDEO_SOURCE_URL  + " TEXT" + ")";
 db.execSQL(CREATED_TABLE);
-//
-/*String CREATED_TABLE = "CREATE TABLE " + TABLE_NAME + "("
- + KEY_ID + " INTEGER PRIMARY KEY,"
- + KEY_JSONSTRING + " TEXT" + ")";
- db.execSQL(CREATED_TABLE);*/
 }
 
 @Override
@@ -104,16 +91,6 @@ db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 onCreate(db);
 }
 
-/*public void addEnvironment(Environment environment) 
-{
-SQLiteDatabase db = this.getWritableDatabase();
-ContentValues values = new ContentValues();
-values.put(KEY_NAME, environment.getName());
-values.put(KEY_PH_NO, environment.getPhoneNumber());
-db.insert(TABLE_NAME, null, values);
-db.close();
-}*/
-//=//
 public void saveTreeNodeAttributesToDataBase(TreeNode treeNode)
 {
 SQLiteDatabase dataBase = this.getWritableDatabase();
@@ -127,10 +104,10 @@ values.put(KEY_DEVICES_PATTERNS_ARRAY_STRING, treeNode.getEnvironmentDevicesArra
 values.put(KEY_CHILDREN_NAMES_ARRAY_STRING, treeNode.getEnvironmentDevicesArrayListString(3));
 //JSON STRINGS mAY BE COMMENTED BECOUSE UPDAITING IT - CAUSE TO RECURSIVE
 //MULTIPLE SAVING AND FINALLY - FREEZING PROGRAM
-
 values.put(KEY_BUTTON_STATE_INT, treeNode.getButtonStateInt());
 values.put(KEY_MULTISENSOR_ARRAY_POSITION, treeNode.getMultiSensorArrayPosition());
 values.put(KEY_NODE_TYPE, treeNode.getNodeType());
+values.put(KEY_VIDEO_SOURCE_URL, treeNode.getVideoSourceUrl());
 dataBase.insert(TABLE_NAME, null, values);
 dataBase.close();
 }
@@ -167,12 +144,12 @@ return environment;
 public void getSavedTreeNodeAttributesFromDataBase(String numberSavedPosition)
 {
 SQLiteDatabase db = this.getReadableDatabase();
-Cursor cursor = db.query(TABLE_NAME, new String[] { KEY_ID, KEY_IERARCHICAL_NAME, KEY_ENVIRONMENT_NAME, KEY_ENVIRONMENT_PICTURE, KEY_DEVICES_NAMES_ARRAY_STRING, KEY_DEVICES_PICTURES_ARRAY_STRING, KEY_CHILDREN_NAMES_ARRAY_STRING, KEY_DEVICES_PATTERNS_ARRAY_STRING, KEY_BUTTON_STATE_INT, KEY_MULTISENSOR_ARRAY_POSITION, KEY_NODE_TYPE }, KEY_ID + "=?", new String[] { numberSavedPosition }, null, null, null, null);
+Cursor cursor = db.query(TABLE_NAME, new String[] { KEY_ID, KEY_IERARCHICAL_NAME, KEY_ENVIRONMENT_NAME, KEY_ENVIRONMENT_PICTURE, KEY_DEVICES_NAMES_ARRAY_STRING, KEY_DEVICES_PICTURES_ARRAY_STRING, KEY_CHILDREN_NAMES_ARRAY_STRING, KEY_DEVICES_PATTERNS_ARRAY_STRING, KEY_BUTTON_STATE_INT, KEY_MULTISENSOR_ARRAY_POSITION, KEY_NODE_TYPE, KEY_VIDEO_SOURCE_URL }, KEY_ID + "=?", new String[] { numberSavedPosition }, null, null, null, null);
 //<=+=>//Cursor cursor = db.query(TABLE_NAME, new String[] { KEY_ID, KEY_IERARCHICAL_NAME, KEY_ENVIRONMENT_NAME, KEY_ENVIRONMENT_PICTURE, KEY_DEVICES_NAMES_ARRAY_JSON_STRING, KEY_BUTTON_STATE_INT, KEY_MULTISENSOR_ARRAY_POSITION, KEY_NODE_TYPE }, KEY_ID + "=?", new String[] { numberSavedPosition }, null, null, null, null);
 if (cursor != null && cursor.getCount()>0)
 {
 cursor.moveToFirst();
-for (int i=0;i<10;i++)
+for (int i=0;i<11;i++)
 {
 savedTreeNodeAttributesFromDataBaseReturnStringArray[i] = cursor.getString(i+1);
 }
@@ -181,7 +158,7 @@ else
 {
 //<=+=>//
 cursor.moveToFirst();
-for (int i=0;i<10;i++)
+for (int i=0;i<11;i++)
 {
 savedTreeNodeAttributesFromDataBaseReturnStringArray[i] = "er"+i+" count: "+getDataBaseItemsQuantity();
 }
@@ -203,13 +180,13 @@ cursor.moveToFirst();
 Type type = new TypeToken<ArrayList<TreeNode>>() {}.getType();
 return gson.fromJson(cursor.getString(0), type);
 }*/
-
+ 
 public TreeNode formTreeNodeFromDataBaseRestoredData(String numberSavedPosition)
 //public TreeNode formTreeNodeFromDataBaseRestoredData(String numberSavedPosition, TreeNode treeNode)
 {
 Log.i("DataBaseHadler", "0");
 getSavedTreeNodeAttributesFromDataBase(numberSavedPosition);
-temporaryTreeNode = new TreeNode("node_"+numberSavedPosition,  savedTreeNodeAttributesFromDataBaseReturnStringArray[1], Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[2]).intValue(), implementInRobotListener, Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[7]).intValue(), Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[8]).intValue(), Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[9]).intValue());
+temporaryTreeNode = new TreeNode("node_"+numberSavedPosition,  savedTreeNodeAttributesFromDataBaseReturnStringArray[1], Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[2]).intValue(), implementInRobotListener, Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[7]).intValue(), Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[8]).intValue(), Integer.valueOf(savedTreeNodeAttributesFromDataBaseReturnStringArray[9]).intValue(), savedTreeNodeAttributesFromDataBaseReturnStringArray[10]);
 if (savedTreeNodeAttributesFromDataBaseReturnStringArray[5]!=null) //fOR A VARIANT, WE HERE VERIFIING IF STRING DEVICES PATTERNS AVAIABLE
 {
 
@@ -283,7 +260,8 @@ savedTreeNodeAttributesFromDataBaseReturnStringArray[5]+"/"+
 savedTreeNodeAttributesFromDataBaseReturnStringArray[6]+"/"+
 savedTreeNodeAttributesFromDataBaseReturnStringArray[7]+"/"+
 savedTreeNodeAttributesFromDataBaseReturnStringArray[8]+"/"+
-savedTreeNodeAttributesFromDataBaseReturnStringArray[9]+"/";
+savedTreeNodeAttributesFromDataBaseReturnStringArray[9]+"/"+
+savedTreeNodeAttributesFromDataBaseReturnStringArray[10]+"/";
 }
 
 //NONEED NOW?????????????????????
@@ -342,6 +320,8 @@ values.put(KEY_CHILDREN_NAMES_ARRAY_STRING, treeNode.getEnvironmentDevicesArrayL
 values.put(KEY_BUTTON_STATE_INT, treeNode.getButtonStateInt());
 values.put(KEY_MULTISENSOR_ARRAY_POSITION, treeNode.getMultiSensorArrayPosition());
 values.put(KEY_NODE_TYPE, treeNode.getNodeType());
+values.put(KEY_NODE_TYPE, treeNode.getNodeType());
+values.put(KEY_VIDEO_SOURCE_URL, treeNode.getVideoSourceUrl());
 return dataBase.update(TABLE_NAME, values, KEY_ID + " = ?", new String[] { numberOfPositionInDataBase });
 }
 
@@ -389,7 +369,8 @@ this.close();
 super.finalize();
 }
 
-public static String convertArrayToString(String[] array)
+//NEED DELETE???
+/*public static String convertArrayToString(String[] array)
 {
 String str = "";
 for (int i = 0;i<array.length; i++) 
@@ -408,7 +389,7 @@ public static String[] convertStringToArray(String str)
 {
 String[] arr = str.split(strSeparator);
 return arr;
-}
+}*/
 
 public static String convertArrayListToString(ArrayList<String> arrayList)
 {
