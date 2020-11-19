@@ -1,16 +1,12 @@
 package com.starweaver.membrana;
 
+import android.*;
 import android.content.*;
 import android.graphics.*;
-import android.graphics.drawable.*;
-import android.support.graphics.drawable.animated.*;
 import android.view.*;
 import android.widget.*;
 import android.widget.RelativeLayout.*;
 import java.util.*;
-
-import android.support.graphics.drawable.animated.R;
-import android.util.*;
 
 public class DeviceListViewAdapter extends BaseAdapter 
 {
@@ -32,7 +28,7 @@ private int buttonStateInt;
 private int globalButtonStateInt;
 private int globalPosition;
 private String topicString;
-String[] mqttString = new String[5];
+String[] mqttString = new String[]{"00","00","00","00","00"};
 
 //public DeviceListViewAdapter(Context context, ArrayList<String> data1, ArrayList<Integer> img_data1, ArrayList<Integer> pattern1, ImplementInRobot listener, String t, String[] s, boolean b, int buttonStateInt, FragmentDevices fragmentDevices)
 public DeviceListViewAdapter(Context context, ArrayList<String> data1, ArrayList<Integer> img_data1, ArrayList<Integer> pattern1, ImplementInRobot listener, String t, boolean b, int buttonStateInt, FragmentDevices fragmentDevices)
@@ -373,32 +369,31 @@ imageMultisensorHumidity.setImageResource(R.drawable.smart_humidity);
 imageMultisensorPressure.setImageResource(R.drawable.smart_pressure);
 imageMultisensorCo2.setImageResource(R.drawable.smart_co2);
 
-textMultisensorLumen.setText(mqttString[0] + "Lm");
+textMultisensorLumen.setText((mqttString[0] == null) ? "00Lm": mqttString[0] + "Lm");
 textMultisensorLumen.setTextSize(14);
 textMultisensorLumen.setTypeface(Typeface.MONOSPACE);
 //textMultisensorLumen.setTextColor(Color.parseColor("#509C4E"));
-textMultisensorLumen.setTextColor(R.color.chart_color);
-//textView.setText(dataString[position]+nominals[position]);
+//textMultisensorLumen.setTextColor(R.color.chart_color);
 //
-textMultisensorTemperature.setText(mqttString[1] + "°C");
+textMultisensorTemperature.setText((mqttString[1] == null) ? "00°C": mqttString[1] + "°C");
 textMultisensorTemperature.setTextSize(14);
 textMultisensorTemperature.setTypeface(Typeface.MONOSPACE);
 //textMultisensorTemperature.setTextColor(R.color.sensor_color);
 //
-textMultisensorHumidity.setText(mqttString[2] + "%");
+textMultisensorHumidity.setText((mqttString[2] == null) ? "00%": mqttString[2] + "%");
 textMultisensorHumidity.setTextSize(14);
 textMultisensorHumidity.setTypeface(Typeface.MONOSPACE);
-textMultisensorHumidity.setTextColor(R.color.chart_color);
+//textMultisensorHumidity.setTextColor(R.color.chart_color);
 //
-textMultisensorPressure.setText(mqttString[3] + "mmHg");
+textMultisensorPressure.setText((mqttString[3] == null) ? "000mmHg": mqttString[3] + "mmHg");
 textMultisensorPressure.setTextSize(14);
 textMultisensorPressure.setTypeface(Typeface.MONOSPACE);
-textMultisensorPressure.setTextColor(R.color.chart_color);
+//textMultisensorPressure.setTextColor(R.color.chart_color);
 //
-textMultisensorCo2.setText(mqttString[4] + "Ppc");
+textMultisensorCo2.setText((mqttString[4] == null) ? "00Ppc": mqttString[4] + "Ppc");
 textMultisensorCo2.setTextSize(14);
 textMultisensorCo2.setTypeface(Typeface.MONOSPACE);
-textMultisensorCo2.setTextColor(R.color.material_blue_grey_800);
+//textMultisensorCo2.setTextColor(R.color.material_blue_grey_800);
 //
 break;
 case 2://avatar
