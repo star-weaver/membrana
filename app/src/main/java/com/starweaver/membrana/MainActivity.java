@@ -680,7 +680,7 @@ private void formNodeTree(boolean isNeedSaveToDatabase)
 rootNode = new TreeNode<String>("0", "MEMBRANA", R.drawable.test, this, 2, 0, 7);
 node1_0 = rootNode.addChild("1_0", "House", R.drawable.house2, this, 2, 0, 0);			
 node1_1 = rootNode.addChild("1_1","Flat",R.drawable.flat4, this, 2, 0, 0);			
-node1_2 = rootNode.addChild("1_2","Office",R.drawable.office1, this, 2, 0, 1, "rtsp://888888:nextlight01@178.150.46.212:554/cam/realmonitor?channel=1&subtype=1");
+node1_2 = rootNode.addChild("1_2","Office",R.drawable.office1, this, 2, 0, 1, "---");
 node1_2.addDevice(1,"Multisensor",R.drawable.icons13);
 node1_2.addDevice(0,"Lights",R.drawable.smart_lamp_new);
 node1_2.addDevice(0,"Plug",R.drawable.smart_plug);
@@ -691,7 +691,7 @@ node2_0.addDevice(0,"Lights",R.drawable.smart_lamp_new);
 node2_1 = node1_0.addChild("2_1", "Pool", R.drawable.pool_winter, this, 2, 0, 1);
 node2_1.addDevice(1,"Multisensor",R.drawable.icons13);
 node2_1.addDevice(0,"Gate",R.drawable.smart_gate_new);
-node2_2 = node1_1.addChild("2_2", "Hallway", R.drawable.hallway0, this, 2, 0, 1, "rtsp://admin:admin@178.150.44.167:554/cam/realmonitor?channel=4&subtype=1");//rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
+node2_2 = node1_1.addChild("2_2", "Hallway", R.drawable.hallway0, this, 2, 0, 1, "---");//rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
 node2_2.addDevice(1,"Multisensor",R.drawable.icons13);
 node2_2.addDevice(0,"Lights",R.drawable.smart_lamp_new);
 node2_3 = node1_1.addChild("2_3", "Greenhouse", R.drawable.gan, this, 2, 0, 1);

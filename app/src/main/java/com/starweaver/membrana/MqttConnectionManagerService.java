@@ -24,7 +24,7 @@ final String subscriptionTopicMultisensor = "multisensor";
 //final String subscriptionTopicMultisensor2 = "Greenhouse";
 final String username = "androidUser";
 final String password = "888888";
-final String serverUri = "tcp://178.150.46.212:1883";
+final String serverUri = "---";
 final String clientId = "ExampleAndroidClient";
 Context context;
 String[] mqttString = new String[5];
