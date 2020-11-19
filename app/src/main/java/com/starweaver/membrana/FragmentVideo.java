@@ -1,5 +1,6 @@
 package com.starweaver.membrana;
 
+import android.*;
 import android.app.*;
 import android.content.*;
 import android.os.*;
@@ -12,16 +13,12 @@ TitleString titleString;
 int cameraNumber;
 
 //https://stackoverflow.com/questions/9632387/arraylist-add-throws-arrayindexoutofboundsexception
-ArrayList<String> videoLink = new ArrayList<String>(Arrays.asList(
-"rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov", 
-"rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"
-//"rtsp://admin:HuaWei123@192.168.0.101/LiveMedia/ch1/Media1",
-//"rtsp://admin:HuaWei123@192.168.0.101/LiveMedia/ch1/Media1"
-));
+String videoLink;
 
-public FragmentVideo(int c) 
+public FragmentVideo(int c, String videoLink) 
 {
 cameraNumber = c;
+this.videoLink = videoLink;
 }
 
 @Override 
@@ -47,7 +44,7 @@ public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, i
 @Override 
 public void surfaceCreated(SurfaceHolder surfaceHolder) 
 {
-videoThread = new VideoThread(getHolder(), videoLink.get(cameraNumber));
+videoThread = new VideoThread(getHolder(), videoLink);
 //videoThread.setRunning(true);
 //((MainActivity)getActivity()).testTextView.setText("SurfaceChanged");
 //videoThread.setInt(2);//is need??
