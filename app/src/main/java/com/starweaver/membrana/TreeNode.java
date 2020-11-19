@@ -1,9 +1,7 @@
 package com.starweaver.membrana;
 
-import java.util.Iterator;
-import java.util.LinkedList;
+import android.*;
 import java.util.*;
-import com.google.gson.*;
 
 public class TreeNode<T> implements Iterable<TreeNode<T>> 
 {
@@ -18,6 +16,7 @@ FragmentDevices nodeFragmentDevices;
 private ImplementInRobot implementInRobotListener;
 
 private String environmentName;
+private String videoSourceUrl = "";
 private static String environmentDevicesArrayListJsonString;
 private String[] mqttString = new String[5];
 private int nodeType; //0-primelistview(7root_dark;8root_light);1-devices with mult;2-devices w/o mult;3-timer;
@@ -52,6 +51,23 @@ multisensorAvaiable = (nodeType == 1) ? true : false;
 nodeFragmentDevices = new FragmentDevices(environmentDevicesNamesArrayList, environmentDevicesPicturesArrayList, environmentDevicesPatternsArrayList, implementInRobotListener, environmentName, multisensorAvaiable, buttonStateInt, multisensorArrayPosition);
 }
 
+public TreeNode(T ierarchicalName, String environmentName, int environmentPicture, ImplementInRobot implementInRobotListener, int buttonStateInt, int multisensorArrayPosition, int nodeType, String videoSourceUrl) 
+{
+this.ierarchicalName = ierarchicalName;
+this.children = new LinkedList<TreeNode<T>>();
+this.elementsIndex = new LinkedList<TreeNode<T>>();
+this.elementsIndex.add(this);
+this.environmentName = environmentName;
+this.environmentPicture = environmentPicture;
+this.nodeType = nodeType;
+this.implementInRobotListener = implementInRobotListener;
+this.buttonStateInt = buttonStateInt;
+this.multisensorArrayPosition = multisensorArrayPosition;
+this.videoSourceUrl = videoSourceUrl;
+multisensorAvaiable = (nodeType == 1) ? true : false;
+nodeFragmentDevices = new FragmentDevices(environmentDevicesNamesArrayList, environmentDevicesPicturesArrayList, environmentDevicesPatternsArrayList, implementInRobotListener, environmentName, multisensorAvaiable, buttonStateInt, multisensorArrayPosition);
+}
+
 public boolean isRoot() 
 {
 return parent == null;
@@ -65,6 +81,12 @@ return children.size() == 0;
 public String getIerarchicalName()
 {
 return  ierarchicalName.toString();
+}
+
+
+public String getVideoSourceUrl()
+{
+return videoSourceUrl;
 }
 
 public int getButtonStateInt()
@@ -149,6 +171,30 @@ return environmentDevicesArrayListJsonString;
 public TreeNode<T> addChild(T childNodeIerarchicalName, String childNodeEnvironmentName, int childNodeEnvironmentPicture, ImplementInRobot implementInRobotListener, int buttonStateInt, int multisensorArrayPosition, int nodeType) 
 {
 TreeNode<T> childNode = new TreeNode<T>(childNodeIerarchicalName, childNodeEnvironmentName, childNodeEnvironmentPicture, implementInRobotListener, buttonStateInt, multisensorArrayPosition, nodeType);
+childNode.parent = this;
+this.children.add(childNode);
+if (this.nodeType==0 || this.nodeType==7 || this.nodeType==8) //type - primelistview (theme color variations)
+{
+//for (TreeNode<T> childNodeItem : this.children) {}
+this.environmentDevicesNamesArrayList.add(childNode.getEnvironmentName());
+this.environmentDevicesPicturesArrayList.add(childNode.getEnvironmentPicture());
+this.environmentDevicesPatternsArrayList.add(8);
+}
+if (this.nodeType==3) //type - timer
+{
+this.environmentDevicesNamesArrayList.add(childNode.getEnvironmentName());
+this.environmentDevicesPicturesArrayList.add(childNode.getEnvironmentPicture());
+this.environmentDevicesPatternsArrayList.add(7);
+this.environmentDevicesPatternsArrayList.add(7);
+this.environmentDevicesPatternsArrayList.add(7);
+}
+this.registerChildForSearch(childNode);
+return childNode;
+}
+
+public TreeNode<T> addChild(T childNodeIerarchicalName, String childNodeEnvironmentName, int childNodeEnvironmentPicture, ImplementInRobot implementInRobotListener, int buttonStateInt, int multisensorArrayPosition, int nodeType, String videoSourceLink) 
+{
+TreeNode<T> childNode = new TreeNode<T>(childNodeIerarchicalName, childNodeEnvironmentName, childNodeEnvironmentPicture, implementInRobotListener, buttonStateInt, multisensorArrayPosition, nodeType, videoSourceLink);
 childNode.parent = this;
 this.children.add(childNode);
 if (this.nodeType==0 || this.nodeType==7 || this.nodeType==8) //type - primelistview (theme color variations)
@@ -314,5 +360,6 @@ public void setChildrenNamesArrayList(ArrayList<String> arrayList)
 {
 this.childrenNamesArrayList=arrayList;
 }
+
 
 }
