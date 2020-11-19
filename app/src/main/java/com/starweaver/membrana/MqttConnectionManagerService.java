@@ -1,11 +1,11 @@
 package com.starweaver.membrana;
 
+import android.*;
 import android.app.*;
 import android.content.*;
 import android.net.*;
 import android.os.*;
 import android.util.*;
-import java.nio.*;
 import java.util.*;
 import org.eclipse.paho.android.service.*;
 import org.eclipse.paho.client.mqttv3.*;
@@ -24,7 +24,7 @@ final String subscriptionTopicMultisensor = "multisensor";
 //final String subscriptionTopicMultisensor2 = "Greenhouse";
 final String username = "androidUser";
 final String password = "888888";
-final String serverUri = "tcp://37.57.199.109:1883";
+final String serverUri = "tcp://178.150.46.212:1883";
 final String clientId = "ExampleAndroidClient";
 Context context;
 String[] mqttString = new String[5];
@@ -44,7 +44,7 @@ final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we 
 @Override
 public IBinder onBind(Intent intent) 
 {
-notificationMessage("get binder");
+//notificationMessage("get binder");
 return mMessenger.getBinder();
 }
 
@@ -64,19 +64,19 @@ case MSG_UNREGISTER_CLIENT:
 mClients.remove(msg.replyTo);
 break;
 case MSG_SET_INT_VALUE:
-notificationMessage("" + msg.arg1);
+//notificationMessage("" + msg.arg1);
 mqttPublishLight(msg.arg1);
 break;
 case MSG_SET_STRING_VALUE:
 String str1 = msg.getData().getString("str1");
 String str2 = msg.getData().getString("str2");
 String str3 = msg.getData().getString("str3");
-notificationMessage(str1 + str2 + str3);
+//notificationMessage(str1 + str2 + str3);
 mqttPublish(str1,str2,str3);
 break;
 case MSG_SET_ASTRAL_VALUE://NOWORK NOW STILL!!
 String astralString = msg.getData().getString("str1");
-notificationMessage("astralString");
+//notificationMessage("astralString");
 astralPublish(astralString);
 break;
 default:
@@ -133,7 +133,7 @@ client = createMqttAndroidClient();
 //mqtt end
 isRunning = true;
 notifycationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-notificationMessage("onCreate");
+//notificationMessage("onCreate");
 }
 
 @Override
@@ -144,7 +144,7 @@ super.onStartCommand(intent, flags, startId);
 this.connect(client, options);
 //mqtt end
 Log.i("MyService", "Received start id " + startId + ": " + intent);
-notificationMessage("Service Restarted");
+//notificationMessage("Service Restarted");
 return START_STICKY; // run until explicitly stopped.
 }
 
@@ -160,7 +160,7 @@ super.onDestroy();
 //notifycationManager.cancel(R.string.service_started); // Cancel the persistent notification.
 Log.d("MyService", "onDestroy");
 isRunning = false;
-notificationMessage("onDestroy");
+//notificationMessage("onDestroy");
 }
 
 public void notificationMessage(String s)
