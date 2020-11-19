@@ -1,14 +1,13 @@
 package com.starweaver.membrana;
 
+import android.*;
 import android.app.*;
 import android.content.*;
-import android.content.pm.*;
 import android.content.res.*;
 import android.graphics.*;
 import android.os.*;
 import android.support.design.internal.*;
 import android.support.design.widget.*;
-import android.support.v7.appcompat.*;
 import android.util.*;
 import android.view.*;
 import android.view.View.*;
@@ -17,7 +16,6 @@ import android.widget.RelativeLayout.*;
 import java.util.*;
 import org.eclipse.paho.android.service.*;
 
-import android.support.v7.appcompat.R;
 import android.view.View.OnClickListener;
 
 //www.android-ide.com/tutorial_git.html
@@ -112,72 +110,86 @@ static int chartRequestCounter;
 static final Handler chartResposeHandler = new Handler();
 
 class IncomingHandler extends Handler 
-{
+{//0
 @Override
 public void handleMessage(Message msg) 
-{
+{//1
 switch (msg.what) 
-{
+{//2
 case MqttConnectionManagerService.MSG_SET_INT_VALUE:
 break;
 case MqttConnectionManagerService.MSG_SET_STRING_VALUE:
 String str1 = msg.getData().getString("str1");
 String str2 = msg.getData().getString("str2");
 if (str1 == "chart")
-{
+{//3
 char[] separated = str2.toCharArray();
 lineChartArrayList.clear();
 for (int i=0; i < separated.length+1; i++)
-{
+{//4
 lineChartArrayList.add(i, Float.valueOf(separated[i]));
-}
+}//4
 titleString.setLineChartArrayList(lineChartArrayList);
-}// end of if (str1 == "chart")
+}//3 end of if (str1 == "chart")
 else if (str1 == "chart_request_recieved")
-{
+{//5
 titleString.setChartDataWasRecieved(true);
-}
+}//5
 else
-{
+{//6
 char[] separated = str2.toCharArray();
 temporString[0] = (separated[0] + "") + (separated[1] + "");
 temporString[1] = (separated[2] + "") + (separated[3] + "");
 temporString[2] = (separated[4] + "") + (separated[5] + "");
 temporString[3] = (separated[6] + "") + (separated[7] + "") + (separated[8] + "");
-temporString[4] = (separated[9] + "") + (separated[10] + "") + (separated[11] + "");
-switch (str1)
-{
-//case "Multisensor/Office":
+temporString[4] = "000";//(separated[9] + "") + (separated[10] + "") + (separated[11] + "");
+toastMessage(str1+"< "+str2+" >"+currentLevelTreeNode.getEnvironmentName());
+
+if (str1.equals(currentLevelTreeNode.getEnvironmentName()+"/"+"Multisensor"))
+{//7
+currentLevelTreeNode.setMqttString(temporString);
+refreshFragmentDevices();
+}//7
+if (str1.equals("multisensor") && currentLevelTreeNode.getEnvironmentName().equals("Office"))
+{//8
+currentLevelTreeNode.setMqttString(temporString);
+//toastMessage("catch!");
+//toastMessage(str2);
+refreshFragmentDevices();
+}//8
+/*switch (str1)
+{//9
+//case "Office/Multisensor":
 case "multisensor":
 //NEED FIND CONCRETE TREENODE TO SAVE CONCRETE MQTTSTRING
 currentLevelTreeNode.setMqttString(temporString);
-if (titleString.getMultisensorStateArray(0) == true)
-{
-refreshFragment(0);
-}
+if (titleString.getMultisensorStateArray(0) == true) current=environmentname currentLevelTreeNode.getEnvironmentName()
+{//10
+refreshFragmentDevices();
+}//10
 break;
-case "Multisensor/Hallway/Data":
+case "Hallway/Multisensor":
 setMqttString(1);
 if (titleString.getMultisensorStateArray(1) == true)
-{
-refreshFragment(3);
-}
+{//11
+refreshFragmentDevices();
+}//11
 break;
-case "Multisensor/Greenhouse":
+case "Greenhouse/Multisensor":
 setMqttString(0);
 if (titleString.getMultisensorStateArray(2) == true)
-{
-refreshFragment(4);
-}
+{//12
+refreshFragmentDevices();
+}//12
 break;
-}
+}*///9
 }//end of else -- if (str1 == "chart")
 //}//end - if multisensor avaiable
 break;
-/*case Implement.MSG_SET_STRING_VALUE:
-//String str3 = msg.getData().getString("str1");
-sendMessageStringToService("Test", "Implement", "str3");
-break;*/
+//case Implement.MSG_SET_STRING_VALUE:
+////String str3 = msg.getData().getString("str1");
+//sendMessageStringToService("Test", "Implement", "str3");
+//break;
 default:
 super.handleMessage(msg);
 break;
@@ -234,13 +246,20 @@ Log.i("MainActivity", " dataBase_Absent");
 if (treeNodes.get(0).getNodeType()==8) setTheme(R.style.AlternativeTheme);//https://stackoverflow.com/questions/11562051/change-activitys-theme-programmatically
 super.onCreate(savedInstanceState);
 setContentView(R.layout.main);
-titleString = new TitleString();
-titleIcon = new TitleIcon();
+titleString = new TitleString();//IS NEED???
+titleIcon = new TitleIcon();//IS NEED???
 actionBar = getActionBar();//menu back button
 actionBar.setDisplayHomeAsUpEnabled(true);//menu back button
 actionBar.setHomeAsUpIndicator(R.drawable.mybuttonicon);
 actionBar.setDisplayShowHomeEnabled(false);
 actionBar.setDisplayShowTitleEnabled(false);
+
+/*ImageView homeIconImageView = (ImageView) findViewById(android.R.id.home);
+FrameLayout.LayoutParams homeIconImageViewLayoutParams = (FrameLayout.LayoutParams) homeIconImageView.getLayoutParams();
+homeIconImageViewLayoutParams.topMargin = homeIconImageViewLayoutParams.bottomMargin = 100;
+homeIconImageViewLayoutParams.leftMargin = homeIconImageViewLayoutParams.rightMargin = 500;
+homeIconImageView.setLayoutParams(homeIconImageViewLayoutParams);*/
+
 mInflater = LayoutInflater.from(this);
 mCustomView = mInflater.inflate(R.layout.custom_actionbar, null);
 mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
@@ -257,11 +276,12 @@ mTitleTextView.setLayoutParams(lp);
 mTitleTextView.setGravity(Gravity.CENTER);
 actionBar.setCustomView(mCustomView);
 actionBar.setDisplayShowCustomEnabled(true);
+
 bottomNavigationView = (BottomNavigationView) findViewById (R.id.bottom_navigation);
 BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigationView.getChildAt(0);
 final Menu menu = bottomNavigationView.getMenu();
 setGlobalMenu(menu);
-globalMenu.add(Menu.NONE, 1, Menu.NONE, null).setIcon(R.drawable.energy_icon_bottom_menu);
+globalMenu.add(Menu.NONE, 1, Menu.NONE, null).setIcon(R.drawable.energy_icon_bottom_menu_00);
 globalMenu.add(Menu.NONE, 2, Menu.NONE, null).setIcon(R.drawable.app_icon_bottom_menu);
 globalMenu.add(Menu.NONE, 3, Menu.NONE, null).setIcon(R.drawable.notify_icon_bottom_menu_00);
 //is this work??:
@@ -660,7 +680,7 @@ private void formNodeTree(boolean isNeedSaveToDatabase)
 rootNode = new TreeNode<String>("0", "MEMBRANA", R.drawable.test, this, 2, 0, 7);
 node1_0 = rootNode.addChild("1_0", "House", R.drawable.house2, this, 2, 0, 0);			
 node1_1 = rootNode.addChild("1_1","Flat",R.drawable.flat4, this, 2, 0, 0);			
-node1_2 = rootNode.addChild("1_2","Office",R.drawable.office1, this, 2, 0, 1);
+node1_2 = rootNode.addChild("1_2","Office",R.drawable.office1, this, 2, 0, 1, "rtsp://888888:nextlight01@178.150.46.212:554/cam/realmonitor?channel=1&subtype=1");
 node1_2.addDevice(1,"Multisensor",R.drawable.icons13);
 node1_2.addDevice(0,"Lights",R.drawable.smart_lamp_new);
 node1_2.addDevice(0,"Plug",R.drawable.smart_plug);
@@ -671,7 +691,7 @@ node2_0.addDevice(0,"Lights",R.drawable.smart_lamp_new);
 node2_1 = node1_0.addChild("2_1", "Pool", R.drawable.pool_winter, this, 2, 0, 1);
 node2_1.addDevice(1,"Multisensor",R.drawable.icons13);
 node2_1.addDevice(0,"Gate",R.drawable.smart_gate_new);
-node2_2 = node1_1.addChild("2_2", "Hallway", R.drawable.hallway0, this, 2, 0, 1);
+node2_2 = node1_1.addChild("2_2", "Hallway", R.drawable.hallway0, this, 2, 0, 1, "rtsp://admin:admin@178.150.44.167:554/cam/realmonitor?channel=4&subtype=1");//rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
 node2_2.addDevice(1,"Multisensor",R.drawable.icons13);
 node2_2.addDevice(0,"Lights",R.drawable.smart_lamp_new);
 node2_3 = node1_1.addChild("2_3", "Greenhouse", R.drawable.gan, this, 2, 0, 1);
@@ -758,7 +778,7 @@ fragmentList.add(5, fragmentDevicesListView4);
 fragmentList.add(6, fragmentDevicesListView5);
 }
 
-public void refreshFragment(int numberOfFragment)
+public void refreshFragmentDevices()
 {
 fTrans = getFragmentManager().beginTransaction();
 fTrans.detach(currentLevelTreeNode.getNodeFragmentDevices());
@@ -779,7 +799,7 @@ if (currentLevelTreeNode.getNodeType()==1)
 {
 //FragmentMjpgStream fragmentMjpgStream = new FragmentMjpgStream();
 //fTrans.add(R.id.frgmCont, fragmentMjpgStream);
-FragmentVideo fragmentVideo = new FragmentVideo(0);
+FragmentVideo fragmentVideo = new FragmentVideo(0,currentLevelTreeNode.getVideoSourceUrl());
 fTrans.add(R.id.frgmCont, fragmentVideo);
 //fTrans.addToBackStack(null);
 }
@@ -857,7 +877,7 @@ globalMenu = menu;
 //this temporary for testing bottomnavigationview clicklistener
 public void toastMessage(String s)
 {
-Toast.makeText(this, s, Toast.LENGTH_LONG).show();
+Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
 }
 
 class ChartRequestTask extends AsyncTask<Void, Void, Void> 
