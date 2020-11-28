@@ -18,7 +18,7 @@ android:layout_marginBottom="-10dp"
 android:layout_width="1dp"
 android:layout_height="1dp" />
 
-<com.mycompany.myapp81.TriangleImageView
+<com.starweaver.membrana.TriangleImageView
 android:id="@+id/myshad"
 android:layout_width="300px"
 android:layout_height="300px"
@@ -26,7 +26,7 @@ android:layout_centerInParent="true"
 gif:shadow="false"
 />
 
-<com.mycompany.myapp81.TriangleImageView
+<com.starweaver.membrana.TriangleImageView
 android:id="@+id/mytri"
 android:layout_width="300px"
 android:layout_height="300px"
