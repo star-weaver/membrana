@@ -92,7 +92,7 @@ android:layout_marginTop="45dp"
 android:layout_toRightOf="@id/head_left_button"
 />
 
-<com.mycompany.myapp81.VerticalSeekBar
+<com.starweaver.membrana.VerticalSeekBar
 android:id="@+id/vertical_seek_bar"
 android:layout_marginTop="45dp"
 android:layout_marginLeft="315dp"
