@@ -35,7 +35,6 @@ android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
 <intent-filter>
 <action android:name="android.intent.action.DEFAULT" />
 <action android:name="android.intent.action.USER_PRESENT" />
-<action android:name="android.intent.action.MAIN" />
 <category android:name="android.intent.category.LAUNCHER" />
 </intent-filter>
 </activity>
@@ -47,7 +46,6 @@ android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
 <intent-filter>
 <action android:name="android.intent.action.DEFAULT" />
 <action android:name="android.intent.action.USER_PRESENT" />
-<action android:name="android.intent.action.MAIN" />
 <category android:name="android.intent.category.LAUNCHER" />
 </intent-filter>
 </activity>
