@@ -5,7 +5,7 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical" >
 
-<com.mycompany.myapp81.CircleImageView
+<com.starweaver.membrana.CircleImageView
 android:id="@+id/mytri"
 android:layout_width="170px"
 android:layout_height="170px"
