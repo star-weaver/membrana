@@ -17,7 +17,7 @@ android:layout_marginLeft="2dp"
 android:layout_toLeftOf="@+id/mytri"
 />
 
-<com.mycompany.myapp81.CircleImageView
+<com.starweaver.membrana.CircleImageView
 android:id="@+id/mytri"
 android:layout_width="170px"
 android:layout_height="170px"
