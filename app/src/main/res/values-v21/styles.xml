@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 <style name="AppTheme" parent="@android:style/Theme.Material.Light">
-<item name="colorPrimaryDark">@color/chart_color</item>
+<item name="colorPrimary">@color/chart_color</item>
+<item name="android:windowDisablePreview">true</item>
+</style>
+
+<style name="AlternativeTheme" parent="@android:style/Theme.Material">
+<item name="colorPrimary">@color/title_night_color</item>
+<item name="android:windowDisablePreview">true</item>
 </style>
 <!--/resources-->
 <!--resources-->
@@ -9,4 +15,5 @@
 <!--item name="android:colorPrimaryDark">@color/status_bar_color</item-->
 
 <!--style-->
+
 </resources>
