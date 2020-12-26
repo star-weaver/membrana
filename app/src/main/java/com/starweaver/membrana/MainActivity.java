@@ -18,7 +18,6 @@ import org.eclipse.paho.android.service.*;
 
 import android.view.View.OnClickListener;
 
-//www.android-ide.com/tutorial_git.html
 //if temp <10 =>mqttstring dont work
 //BLOCHS:
 //https://stackoverflow.com/questions/51584562/calculating-the-distance-and-yaw-between-aruco-marker-and-camera
@@ -95,24 +94,27 @@ private static int multisensorArrayPosition = 99;
 private static String multisensorTopic;
 
 static String testString2;
+static String mqttRequestAnswerData;
 
 Messenger mService = null;
 boolean mIsBound;
 boolean useAlternativeTheme = false;
+boolean isDataRequest = false;
+boolean mqttRequestAnswerDataWasReceived = false;
 final Messenger mMessenger = new Messenger(new IncomingHandler());
 
 Menu globalMenu;
 static int bottomNavigationViewCoefficient = 0;//WORK ON IT NOW..(if not work on it now, think about deleting it..)
 static int bottomNavigationViewCoefficientOld = bottomNavigationViewCoefficient;
 static int bottomNavigationViewCoefficientOnBack = bottomNavigationViewCoefficientOld;
-static int chartRequestCounter;
+static int dataRequestCounter;
 
 static final Handler chartResposeHandler = new Handler();
 
 class IncomingHandler extends Handler 
 {//0
 @Override
-public void handleMessage(Message msg) 
+public void handleMessage( Message msg ) 
 {//1
 switch (msg.what) 
 {//2
@@ -125,15 +127,16 @@ if (str1 == "chart")
 {//3
 char[] separated = str2.toCharArray();
 lineChartArrayList.clear();
-for (int i=0; i < separated.length+1; i++)
+for (int i=0; i < separated.length + 1; i++)
 {//4
 lineChartArrayList.add(i, Float.valueOf(separated[i]));
 }//4
 titleString.setLineChartArrayList(lineChartArrayList);
 }//3 end of if (str1 == "chart")
-else if (str1 == "chart_request_recieved")
+else if (str1 == "mqtt_request_answer_data")
 {//5
-titleString.setChartDataWasRecieved(true);
+mqttRequestAnswerDataWasReceived = true;
+//titleString.setChartDataWasRecieved(true);
 }//5
 else
 {//6
@@ -143,9 +146,10 @@ temporString[1] = (separated[2] + "") + (separated[3] + "");
 temporString[2] = (separated[4] + "") + (separated[5] + "");
 temporString[3] = (separated[6] + "") + (separated[7] + "") + (separated[8] + "");
 temporString[4] = "000";//(separated[9] + "") + (separated[10] + "") + (separated[11] + "");
-toastMessage(str1+"< "+str2+" >"+currentLevelTreeNode.getEnvironmentName());
+//toastMessage(str1+"< "+str2+" >"+currentLevelTreeNode.getEnvironmentName());
+//toastMessage(str1+"<>"+str2);
 
-if (str1.equals(currentLevelTreeNode.getEnvironmentName()+"/"+"Multisensor"))
+if (str1.equals("multisensor" + "/" + currentLevelTreeNode.getEnvironmentName()))
 {//7
 currentLevelTreeNode.setMqttString(temporString);
 refreshFragmentDevices();
@@ -158,31 +162,31 @@ currentLevelTreeNode.setMqttString(temporString);
 refreshFragmentDevices();
 }//8
 /*switch (str1)
-{//9
-//case "Office/Multisensor":
-case "multisensor":
-//NEED FIND CONCRETE TREENODE TO SAVE CONCRETE MQTTSTRING
-currentLevelTreeNode.setMqttString(temporString);
-if (titleString.getMultisensorStateArray(0) == true) current=environmentname currentLevelTreeNode.getEnvironmentName()
-{//10
-refreshFragmentDevices();
-}//10
-break;
-case "Hallway/Multisensor":
-setMqttString(1);
-if (titleString.getMultisensorStateArray(1) == true)
-{//11
-refreshFragmentDevices();
-}//11
-break;
-case "Greenhouse/Multisensor":
-setMqttString(0);
-if (titleString.getMultisensorStateArray(2) == true)
-{//12
-refreshFragmentDevices();
-}//12
-break;
-}*///9
+ {//9
+ //case "Office/Multisensor":
+ case "multisensor":
+ //NEED FIND CONCRETE TREENODE TO SAVE CONCRETE MQTTSTRING
+ currentLevelTreeNode.setMqttString(temporString);
+ if (titleString.getMultisensorStateArray(0) == true) current=environmentname currentLevelTreeNode.getEnvironmentName()
+ {//10
+ refreshFragmentDevices();
+ }//10
+ break;
+ case "Hallway/Multisensor":
+ setMqttString(1);
+ if (titleString.getMultisensorStateArray(1) == true)
+ {//11
+ refreshFragmentDevices();
+ }//11
+ break;
+ case "Greenhouse/Multisensor":
+ setMqttString(0);
+ if (titleString.getMultisensorStateArray(2) == true)
+ {//12
+ refreshFragmentDevices();
+ }//12
+ break;
+ }*///9
 }//end of else -- if (str1 == "chart")
 //}//end - if multisensor avaiable
 break;
@@ -199,7 +203,7 @@ break;
 
 private ServiceConnection mConnection = new ServiceConnection() 
 {
-public void onServiceConnected(ComponentName className, IBinder service) 
+public void onServiceConnected( ComponentName className, IBinder service ) 
 {
 mService = new Messenger(service);
 try 
@@ -213,21 +217,21 @@ catch (RemoteException e)
 // In this case the service has crashed before we could even do anything with it
 }
 }
-public void onServiceDisconnected(ComponentName className) 
+public void onServiceDisconnected( ComponentName className ) 
 {
 // This is called when the connection with the service has been unexpectedly disconnected - process crashed.
 mService = null;
 }
 };
 
-void changeToTheme(Activity activity)
+void changeToTheme( Activity activity )
 {
 activity.finish();
 startActivity(getIntent());
 }
 
 @Override 
-public void onCreate(Bundle savedInstanceState) 
+public void onCreate( Bundle savedInstanceState ) 
 {
 Log.i("MainActivity", "program start");
 dataBaseHandler = new DataBaseHandler(this, this);
@@ -236,34 +240,41 @@ formNodeTreeFromDatabase();//restores database nodes to "treeNodes"
 //formNodeTree(true);//TEMPORARY!!!create and save no-database NODES to database
 //formNodeTree(false);//TEMPORARY!!!create and add no-database NODES to "treeNodes" arraylist
 /*if (dataBaseHandler.dataBaseExists())
-{
-toastMessage("DATABASE EXISTS-items quantity in database: "+dataBaseHandler.getDataBaseItemsQuantity());
-}
-else
-{
-Log.i("MainActivity", " dataBase_Absent");
-}*/
-if (treeNodes.get(0).getNodeType()==8) setTheme(R.style.AlternativeTheme);//https://stackoverflow.com/questions/11562051/change-activitys-theme-programmatically
+ {
+ toastMessage("DATABASE EXISTS-items quantity in database: "+dataBaseHandler.getDataBaseItemsQuantity());
+ }
+ else
+ {
+ Log.i("MainActivity", " dataBase_Absent");
+ }*/
+if (treeNodes.get(0).getNodeType() == 8) setTheme(R.style.AlternativeTheme);//https://stackoverflow.com/questions/11562051/change-activitys-theme-programmatically
 super.onCreate(savedInstanceState);
 setContentView(R.layout.main);
 titleString = new TitleString();//IS NEED???
 titleIcon = new TitleIcon();//IS NEED???
+
 actionBar = getActionBar();//menu back button
 actionBar.setDisplayHomeAsUpEnabled(true);//menu back button
 actionBar.setHomeAsUpIndicator(R.drawable.mybuttonicon);
 actionBar.setDisplayShowHomeEnabled(false);
 actionBar.setDisplayShowTitleEnabled(false);
-
-/*ImageView homeIconImageView = (ImageView) findViewById(android.R.id.home);
-FrameLayout.LayoutParams homeIconImageViewLayoutParams = (FrameLayout.LayoutParams) homeIconImageView.getLayoutParams();
-homeIconImageViewLayoutParams.topMargin = homeIconImageViewLayoutParams.bottomMargin = 100;
-homeIconImageViewLayoutParams.leftMargin = homeIconImageViewLayoutParams.rightMargin = 500;
-homeIconImageView.setLayoutParams(homeIconImageViewLayoutParams);*/
-
+actionBar.setDisplayShowCustomEnabled(true);
 mInflater = LayoutInflater.from(this);
 mCustomView = mInflater.inflate(R.layout.custom_actionbar, null);
 mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
 mTitleTextView.setText(currentLevelTreeNode.getEnvironmentName());
+lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+lp.setMargins(0, 0, 50, 0);
+mTitleTextView.setLayoutParams(lp);
+//mTitleTextView.setGravity(Gravity.CENTER);
+actionBar.setCustomView(mCustomView);
+
+/*ImageView homeIconImageView = (ImageView) findViewById(android.R.id.home);
+ FrameLayout.LayoutParams homeIconImageViewLayoutParams = (FrameLayout.LayoutParams) homeIconImageView.getLayoutParams();
+ homeIconImageViewLayoutParams.topMargin = homeIconImageViewLayoutParams.bottomMargin = 100;
+ homeIconImageViewLayoutParams.leftMargin = homeIconImageViewLayoutParams.rightMargin = 500;
+ homeIconImageView.setLayoutParams(homeIconImageViewLayoutParams);*/
+
 //debug str
 //debugTextView = (TextView) findViewById(R.id.tv);
 //debugButton0 = (Button) findViewById(R.id.debug_button_0);
@@ -271,13 +282,8 @@ mTitleTextView.setText(currentLevelTreeNode.getEnvironmentName());
 //debugButton2 = (Button) findViewById(R.id.debug_button_2);
 //debugTextView.setText("test..");
 //debug end
-lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-mTitleTextView.setLayoutParams(lp);
-mTitleTextView.setGravity(Gravity.CENTER);
-actionBar.setCustomView(mCustomView);
-actionBar.setDisplayShowCustomEnabled(true);
 
-bottomNavigationView = (BottomNavigationView) findViewById (R.id.bottom_navigation);
+bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
 BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigationView.getChildAt(0);
 final Menu menu = bottomNavigationView.getMenu();
 setGlobalMenu(menu);
@@ -302,7 +308,7 @@ iconView.setLayoutParams(layoutParams);
 bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() 
 {
 @Override
-public boolean onNavigationItemSelected(MenuItem item)
+public boolean onNavigationItemSelected( MenuItem item )
 {
 switch (item.getItemId())
 {
@@ -324,20 +330,20 @@ toastMessage("membrana");
 }                                                                                                                                                                                       
 else
 {
-chartRequestCounter = 0;
+dataRequestCounter = 0;
 //->>>-here we will switch to loader fragment
-titleString.Up();//IS NEED IN OUR SITUATION????
-mTitleTextView.setText("Loading chart data..");
-titleIcon.Up();//IS NEED IN OUR SITUATION????
+//titleString.Up();//IS NEED IN OUR SITUATION????
+//mTitleTextView.setText("Loading chart data..");
+//titleIcon.Up();//IS NEED IN OUR SITUATION????
 fragmentMain.setIcon(R.drawable.black, R.drawable.sand);
 fragmentLoading = new FragmentLoading();
 fTrans = getFragmentManager().beginTransaction();
-fTrans.replace(R.id.frgmCont2, fragmentLoading);
-//fTrans.add(R.id.frgmCont2, fragmentLoading);
+//cause error onBack: fTrans.replace(R.id.frgmCont2, fragmentLoading);
+fTrans.add(R.id.frgmCont2, fragmentLoading);
 fTrans.addToBackStack(null);
 fTrans.commit();
-sendMessageStringToService("greenhouse","","1");
-new ChartRequestTask().execute();
+//sendMessageStringToService("greenhouse", "", "1");
+new DataRequestTask().execute();
 }//-1
 break;
 case 3:
@@ -368,7 +374,7 @@ return false;
 threadMist = new ThreadMist();
 threadMist.start();
 
-createFragment();
+createFragment();//need to comment later
 
 Intent intent = getIntent();
 //restoreMe(savedInstanceState);//<-NO NEED???
@@ -380,54 +386,54 @@ doBindService();
 OnClickListener listener = new OnClickListener() 
 {
 @Override
-public void onClick(View v)
+public void onClick( View v )
 {
 /*if (v == debugButton0)
-{
-//[   ENVIRONMENT NAME  & UPDATE  ]
-////debugTextView.setText(""+dataBaseHandler.formTreeNodeFromDataBaseRestoredData("1").getNodeType());
-//debugTextView.setText(""
-					  //+dataBaseHandler.formTreeNodeFromDataBaseRestoredData("2").getEnvironmentDevicesArrayListString(0)
-					  //+dataBaseHandler.formTreeNodeFromDataBaseRestoredData("2").getEnvironmentDevicesArrayListString(3) //8355835
-					  
-					  //+" - "+temporaryTestTreeNodes.get(0).getChildrenNamesArrayList().size()
-                      //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("1")
-					  //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("2")
-					  //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("3")
-					  //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("4")
-					  //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("5")
-					  //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("6")
-					  //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("7")
-					  //+"//TEMPORARYTEST//"+treeNodes.get(0).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(1).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(2).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(3).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(4).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(5).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(6).getEnvironmentDevicesArrayListString(0)
-					  //+"+"+treeNodes.get(7).getEnvironmentDevicesArrayListString(0)
-					  //);
-}*/
+ {
+ //[   ENVIRONMENT NAME  & UPDATE  ]
+ ////debugTextView.setText(""+dataBaseHandler.formTreeNodeFromDataBaseRestoredData("1").getNodeType());
+ //debugTextView.setText(""
+ //+dataBaseHandler.formTreeNodeFromDataBaseRestoredData("2").getEnvironmentDevicesArrayListString(0)
+ //+dataBaseHandler.formTreeNodeFromDataBaseRestoredData("2").getEnvironmentDevicesArrayListString(3) //8355835
+
+ //+" - "+temporaryTestTreeNodes.get(0).getChildrenNamesArrayList().size()
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("1")
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("2")
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("3")
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("4")
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("5")
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("6")
+ //+"//-//"+dataBaseHandler.formTreeNodeFromDataBaseRestoredDataString("7")
+ //+"//TEMPORARYTEST//"+treeNodes.get(0).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(1).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(2).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(3).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(4).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(5).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(6).getEnvironmentDevicesArrayListString(0)
+ //+"+"+treeNodes.get(7).getEnvironmentDevicesArrayListString(0)
+ //);
+ }*/
 /*else if (v == debugButton1)
-{
-if (treeNodes.get(0).getNodeType()==8)
-{
-treeNodes.get(0).setNodeType(7);
-toastMessage("switched to day-theme");
-}
-else
-{
-treeNodes.get(0).setNodeType(8);
-toastMessage("switched to night-theme");
-}
-dataBaseHandler.updateTreeNodeAttributesInDataBase("1",treeNodes.get(0));
-changeToTheme(MainActivity.this);
-}*/
+ {
+ if (treeNodes.get(0).getNodeType()==8)
+ {
+ treeNodes.get(0).setNodeType(7);
+ toastMessage("switched to day-theme");
+ }
+ else
+ {
+ treeNodes.get(0).setNodeType(8);
+ toastMessage("switched to night-theme");
+ }
+ dataBaseHandler.updateTreeNodeAttributesInDataBase("1",treeNodes.get(0));
+ changeToTheme(MainActivity.this);
+ }*/
 /*else if (v == debugButton2)
-{
-dataBaseHandler.deleteAll();
-formNodeTree(true);
-}*/
+ {
+ dataBaseHandler.deleteAll();
+ formNodeTree(true);
+ }*/
 }
 };
 //debugButton0.setOnClickListener(listener);
@@ -446,21 +452,21 @@ getFragmentManager().beginTransaction().add(R.id.frgmCont2, currentLevelTreeNode
 }
 
 @Override
-protected void onSaveInstanceState(Bundle outState) 
+protected void onSaveInstanceState( Bundle outState ) 
 {
 super.onSaveInstanceState(outState);
 }
 
 //IS NEED???
 /*private void restoreMe(Bundle state) 
-{
-if (state != null) 
-{
-//textStatus.setText(state.getString("textStatus"));
-}
-}*/
+ {
+ if (state != null) 
+ {
+ //textStatus.setText(state.getString("textStatus"));
+ }
+ }*/
 
-private void CheckIfServiceIsRunning() 
+private void CheckIfServiceIsRunning( ) 
 {
 //If the service is running when the activity starts, we want to automatically bind to it.
 if (MqttConnectionManagerService.isRunning()) 
@@ -469,7 +475,7 @@ doBindService();
 }
 }
 
-public void sendMessageStringToService(String messageString0, String messageString1, String messageString2)
+public void sendMessageStringToService( String messageString0, String messageString1, String messageString2 )
 {
 if (mIsBound) 
 {
@@ -493,7 +499,7 @@ catch (RemoteException e)
 }
 }
 
-public void  sendMessageStringPublishLightToService(int intvaluetosend)
+public void  sendMessageStringPublishLightToService( int intvaluetosend )
 {
 if (mIsBound) 
 {
@@ -513,13 +519,13 @@ catch (RemoteException e)
 } 
 }
 
-void doBindService() 
+void doBindService( ) 
 {
 bindService(new Intent(this, MqttConnectionManagerService.class), mConnection, Context.BIND_AUTO_CREATE);
 mIsBound = true;
 }
 
-void doUnbindService() 
+void doUnbindService( ) 
 {
 if (mIsBound) 
 {
@@ -544,7 +550,7 @@ mIsBound = false;
 }
 
 @Override
-protected void onDestroy() 
+protected void onDestroy( ) 
 {
 super.onDestroy();
 threadMist.interrupt();
@@ -559,7 +565,7 @@ catch (Throwable t)
 }
 
 @Override
-protected void onResume()
+protected void onResume( )
 {
 //https://stackoverflow.com/questions/40926546/implement-eclipse-mqtt-android-client-using-single-connection-instance/41060618#41060618
 startService(new Intent(this, MqttService.class));//????…
@@ -567,35 +573,41 @@ super.onResume();
 }
 
 @Override//create menu
-public boolean onCreateOptionsMenu(Menu menu) 
+public boolean onCreateOptionsMenu( Menu menu ) 
 {
 getMenuInflater().inflate(R.menu.mymenu, menu);
+if (treeNodes.get(0).getNodeType() == 8)
+{
+menu.getItem(0).setIcon(R.drawable.smart_day_night_n0);
+}
+else
+{
+menu.getItem(0).setIcon(R.drawable.smart_day_night_d0);
+}
 return super.onCreateOptionsMenu(menu);
 }
 // handle button activities
 @Override//menu & back button
-public boolean onOptionsItemSelected(MenuItem item) 
+public boolean onOptionsItemSelected( MenuItem item ) 
 {
 int id = item.getItemId();
 if (id == R.id.item) 
 {
 // do something here
 //Toast.makeText(this, "Here will be Settings", Toast.LENGTH_LONG).show();
-if (treeNodes.get(0).getNodeType()==8)
+if (treeNodes.get(0).getNodeType() == 8)
 {
 treeNodes.get(0).setNodeType(7);
-toastMessage("switched to day-theme");
 }
 else
 {
 treeNodes.get(0).setNodeType(8);
-toastMessage("switched to night-theme");
 }
-dataBaseHandler.updateTreeNodeAttributesInDataBase("1",treeNodes.get(0));
+dataBaseHandler.updateTreeNodeAttributesInDataBase("1", treeNodes.get(0));
 changeToTheme(MainActivity.this);
 }
 /*
-else if (id == R.id.item0)  //for menu "vipadalka"
+ else if (id == R.id.item0)  //for menu "vipadalka"
  {
  // do something here
  Toast.makeText(this, "000", Toast.LENGTH_LONG).show();
@@ -609,18 +621,25 @@ return super.onOptionsItemSelected(item);
 }
 
 @Override
-public void onBackPressed() 
+public void onBackPressed( ) 
 {
 super.onBackPressed();
-titleString.Down();//NO NEED???
-titleIcon.Down();//NO NEED??
+//titleString.Down();//NO NEED???
+//titleIcon.Down();//NO NEED??
+if (isDataRequest) 
+{
+isDataRequest = false;
+}
+else
+{
 switchToParentNode();
-if (titleString.fragmentSettings()&&titleString.fragmentTimerPeriods())
+}
+if (titleString.fragmentSettings() && titleString.fragmentTimerPeriods())
 {
 mTitleTextView.setText(titleString.getTimerTitle());
 titleString.setFragmentTimerPeriodsBoolean(false);
 }
-else if (titleString.fragmentSettings()&&!titleString.fragmentTimerPeriods())
+else if (titleString.fragmentSettings() && !titleString.fragmentTimerPeriods())
 {
 mTitleTextView.setText(titleString.getSettingsTitle());
 titleString.setFragmentSettinsBoolean(false);
@@ -636,14 +655,14 @@ multisensorArrayPosition = 99;//IS NEED
 public class ThreadMist extends Thread 
 {
 @Override
-public void run() 
+public void run( ) 
 {
 while (true) 
 {
 runOnUiThread(new Runnable() 
 {
 @Override
-public void run() 
+public void run( ) 
 {
 fragmentMain.doAnimation1();
 }
@@ -663,7 +682,7 @@ return;
 //setStatusBar for Meizu
 //https://stackoverflow.com/questions/40481700/statusbar-color-doesnt-set-properly-on-meizu-pro-6
 @Override
-public void onWindowFocusChanged(boolean hasFocus) 
+public void onWindowFocusChanged( boolean hasFocus ) 
 {
 super.onWindowFocusChanged(hasFocus);
 if (hasFocus) 
@@ -675,30 +694,30 @@ window.setStatusBarColor(Color.GRAY);
 }
 }
 
-private void formNodeTree(boolean isNeedSaveToDatabase)
+private void formNodeTree( boolean isNeedSaveToDatabase )
 {
 rootNode = new TreeNode<String>("0", "MEMBRANA", R.drawable.test, this, 2, 0, 7);
 node1_0 = rootNode.addChild("1_0", "House", R.drawable.house2, this, 2, 0, 0);			
-node1_1 = rootNode.addChild("1_1","Flat",R.drawable.flat4, this, 2, 0, 0);			
-node1_2 = rootNode.addChild("1_2","Office",R.drawable.office1, this, 2, 0, 1, "---");
-node1_2.addDevice(1,"Multisensor",R.drawable.icons13);
-node1_2.addDevice(0,"Lights",R.drawable.smart_lamp_new);
-node1_2.addDevice(0,"Plug",R.drawable.smart_plug);
-node1_2.addDevice(2,"Avatar",R.drawable.smart_robot);
+node1_1 = rootNode.addChild("1_1", "Flat", R.drawable.flat4, this, 2, 0, 0);			
+node1_2 = rootNode.addChild("1_2", "Office", R.drawable.office1, this, 2, 0, 1, "rtsp://888888:alhareiks01@178.150.46.212:554/cam/realmonitor?channel=1&subtype=1");
+node1_2.addDevice(1, "Multisensor", R.drawable.icons13);
+node1_2.addDevice(0, "Lights", R.drawable.smart_lamp_new);
+node1_2.addDevice(0, "Plug", R.drawable.smart_plug);
+node1_2.addDevice(2, "Avatar", R.drawable.smart_robot);
 node2_0 = node1_0.addChild("2_0", "Yard", R.drawable.yard_winter, this, 2, 0, 1);
-node2_0.addDevice(1,"Multisensor",R.drawable.icons13);
-node2_0.addDevice(0,"Lights",R.drawable.smart_lamp_new);
-node2_1 = node1_0.addChild("2_1", "Pool", R.drawable.pool_winter, this, 2, 0, 1);
-node2_1.addDevice(1,"Multisensor",R.drawable.icons13);
-node2_1.addDevice(0,"Gate",R.drawable.smart_gate_new);
-node2_2 = node1_1.addChild("2_2", "Hallway", R.drawable.hallway0, this, 2, 0, 1, "---");//rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
-node2_2.addDevice(1,"Multisensor",R.drawable.icons13);
-node2_2.addDevice(0,"Lights",R.drawable.smart_lamp_new);
+node2_0.addDevice(1, "Multisensor", R.drawable.icons13);
+node2_0.addDevice(0, "Lights", R.drawable.smart_lamp_new);
+node2_1 = node1_0.addChild("2_1", "Pool", R.drawable.pool_winter, this, 2, 0, 1, "rtsp://888888:alhareiks01@178.150.46.212:554/cam/realmonitor?channel=1&subtype=1");
+node2_1.addDevice(1, "Multisensor", R.drawable.icons13);
+node2_1.addDevice(0, "Gate", R.drawable.smart_gate_new);
+node2_2 = node1_1.addChild("2_2", "Hallway", R.drawable.hallway0, this, 2, 0, 1, "rtsp://admin:160879@178.150.44.167:554/cam/realmonitor?channel=4&subtype=1");//rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
+node2_2.addDevice(1, "Multisensor", R.drawable.icons13);
+node2_2.addDevice(0, "Lights", R.drawable.smart_lamp_new);
 node2_3 = node1_1.addChild("2_3", "Greenhouse", R.drawable.gan, this, 2, 0, 1);
-node2_3.addDevice(1,"Multisensor",R.drawable.icons13);
-node2_3.addDevice(0,"Lights",R.drawable.smart_lamp_new);
-node2_3.addDevice(4,"Drip",R.drawable.smart_humidity_new);
-if(isNeedSaveToDatabase)
+node2_3.addDevice(1, "Multisensor", R.drawable.icons13);
+node2_3.addDevice(0, "Lights", R.drawable.smart_lamp_new);
+node2_3.addDevice(4, "Drip", R.drawable.smart_humidity_new);
+if (isNeedSaveToDatabase)
 {
 dataBaseHandler.saveTreeNodeAttributesToDataBase(rootNode);
 dataBaseHandler.saveTreeNodeAttributesToDataBase(node1_0);
@@ -723,40 +742,40 @@ treeNodes.add(node2_3);
 }
 }
 
-private void formNodeTreeFromDatabase()
+private void formNodeTreeFromDatabase( )
 {
-for(int i=1;i<=dataBaseHandler.getDataBaseItemsQuantity();i++)
+for (int i=1;i <= dataBaseHandler.getDataBaseItemsQuantity();i++)
 {
-treeNodes.add(dataBaseHandler.formTreeNodeFromDataBaseRestoredData(""+i));
+treeNodes.add(dataBaseHandler.formTreeNodeFromDataBaseRestoredData("" + i));
 }
 
-for(int i=0;i<treeNodes.size();i++)
+for (int i=0;i < treeNodes.size();i++)
 {
 formDataBaseTemporaryTreeNode0 = treeNodes.get(i);
 //Log.i("MainActivity-testtree0", formDataBaseTemporaryTreeNode0.getEnvironmentName());
-  for(int j=0;j<formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().size();j++)
-  {
-  //Log.i("MainActivity-testtree>>", ">>"+formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().get(j));
-  for(int k=0;k<treeNodes.size();k++)
-	{
-	formDataBaseTemporaryTreeNode1 = treeNodes.get(k);
-	//Log.i("- -","- -");
-	//Log.i("treenode0 child env name:", formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().get(j));
-	//Log.i("treenode1 env name:", formDataBaseTemporaryTreeNode1.getEnvironmentName());
-	if (formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().get(j).equals(formDataBaseTemporaryTreeNode1.getEnvironmentName()))
-	{
-	//Log.i("- -","BINGO!!!");
-	//node1_0 = rootNode.addChild("1_0", "House", R.drawable.house2, this, 2, 0, 0);
-	formDataBaseTemporaryTreeNode0.addChildNode(treeNodes.get(k));
-	}
-	//Log.i("- -","- -");
-	}
-  }
+for (int j=0;j < formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().size();j++)
+{
+//Log.i("MainActivity-testtree>>", ">>"+formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().get(j));
+for (int k=0;k < treeNodes.size();k++)
+{
+formDataBaseTemporaryTreeNode1 = treeNodes.get(k);
+//Log.i("- -","- -");
+//Log.i("treenode0 child env name:", formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().get(j));
+//Log.i("treenode1 env name:", formDataBaseTemporaryTreeNode1.getEnvironmentName());
+if (formDataBaseTemporaryTreeNode0.getChildrenNamesArrayList().get(j).equals(formDataBaseTemporaryTreeNode1.getEnvironmentName()))
+{
+//Log.i("- -","BINGO!!!");
+//node1_0 = rootNode.addChild("1_0", "House", R.drawable.house2, this, 2, 0, 0);
+formDataBaseTemporaryTreeNode0.addChildNode(treeNodes.get(k));
+}
+//Log.i("- -","- -");
+}
+}
 }
 currentLevelTreeNode = treeNodes.get(0);
 }
 
-public void createFragment()
+public void createFragment( )
 {
 titleString.setSettingsButtonStateArray();
 titleString.setTimerPeriodsStateArray();
@@ -778,7 +797,7 @@ fragmentList.add(5, fragmentDevicesListView4);
 fragmentList.add(6, fragmentDevicesListView5);
 }
 
-public void refreshFragmentDevices()
+public void refreshFragmentDevices( )
 {
 fTrans = getFragmentManager().beginTransaction();
 fTrans.detach(currentLevelTreeNode.getNodeFragmentDevices());
@@ -786,20 +805,28 @@ fTrans.attach(currentLevelTreeNode.getNodeFragmentDevices());
 fTrans.commitAllowingStateLoss();
 }
 
-public void switchToChildNode(int numberOfFragment)
+/*if (!fragmentOne.isAdded()){
+ transaction = manager.beginTransaction();
+ transaction.add(R.id.group,fragmentOne,"Fragment_One");
+ transaction.commit();
+ }*/
+
+public void switchToChildNode( int numberOfFragment )
 {
 currentLevelTreeNode = currentLevelTreeNode.getChild(numberOfFragment);
 mTitleTextView.setText(currentLevelTreeNode.getEnvironmentName());
 fragmentMain.setIcon(currentLevelTreeNode.getEnvironmentPicture(), R.drawable.sand);
-titleString.Up();
-titleString.setGlobalTitleFirst(numberOfFragment);// was 2
-titleIcon.Up();
+//titleString.Up();
+titleString.setGlobalTitleFirst(numberOfFragment);// was 2//IS NEED????
+//titleIcon.Up();
 fTrans = getFragmentManager().beginTransaction();
-if (currentLevelTreeNode.getNodeType()==1)
+if (currentLevelTreeNode.getNodeType() == 1 || currentLevelTreeNode.getNodeType() == 2)
 {
+/*maybe here we must firstly send
+ request for a envir. devices states?*/
 //FragmentMjpgStream fragmentMjpgStream = new FragmentMjpgStream();
 //fTrans.add(R.id.frgmCont, fragmentMjpgStream);
-FragmentVideo fragmentVideo = new FragmentVideo(0,currentLevelTreeNode.getVideoSourceUrl());
+FragmentVideo fragmentVideo = new FragmentVideo(0, currentLevelTreeNode.getVideoSourceUrl());
 fTrans.add(R.id.frgmCont, fragmentVideo);
 //fTrans.addToBackStack(null);
 }
@@ -809,46 +836,46 @@ fTrans.addToBackStack(null);
 fTrans.commit();
 }
 
-public void switchToParentNode()
+public void switchToParentNode( )
 {
 currentLevelTreeNode = currentLevelTreeNode.getParent();
 mTitleTextView.setText(currentLevelTreeNode.getEnvironmentName());
 fragmentMain.setIcon(currentLevelTreeNode.getEnvironmentPicture(), R.drawable.sand);
 }
 
-public void setMultisensorAvaiable(boolean b)
+public void setMultisensorAvaiable( boolean b )
 {
 this.multisensorAvaiable = b;
 }
 
-public boolean multisensorAvaiable()
+public boolean multisensorAvaiable( )
 {
 return multisensorAvaiable;
 }
 
-public void setMultisensorArrayPosition(int arrayPosition)
+public void setMultisensorArrayPosition( int arrayPosition )
 {
 this.multisensorArrayPosition = arrayPosition;
 }
 
-public void seTMultisensorTopic(String s)
+public void seTMultisensorTopic( String s )
 {
 multisensorTopic = s;
 }
 
-public String getMultisensorTopic()
+public String getMultisensorTopic( )
 {
 return multisensorTopic;
 }
 
-public void startImplement()
+public void startImplement( )
 {
 //Intent i = new Intent(MainActivity.this, Implement.class);
 Intent i = new Intent(MainActivity.this, Remote.class);
 startActivity(i);
 }
 
-private void setMqttString(int i)
+private void setMqttString( int i )
 {
 titleString.setMqttStringPosition(i, 0, temporString[0]);
 titleString.setMqttStringPosition(i, 1, temporString[1]);
@@ -857,7 +884,7 @@ titleString.setMqttStringPosition(i, 3, temporString[3]);
 titleString.setMqttStringPosition(i, 4, temporString[4]);
 }
 
-public void setBottomNavigationView(boolean deviceAdapterShown)
+public void setBottomNavigationView( boolean deviceAdapterShown )
 {
 if (deviceAdapterShown) 
 {
@@ -869,27 +896,29 @@ globalMenu.getItem(1).setIcon(R.drawable.app_icon_bottom_menu);
 }
 }
 
-public void setGlobalMenu(Menu menu)
+public void setGlobalMenu( Menu menu )
 {
 globalMenu = menu;
 }
 
 //this temporary for testing bottomnavigationview clicklistener
-public void toastMessage(String s)
+public void toastMessage( String s )
 {
 Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
 }
 
-class ChartRequestTask extends AsyncTask<Void, Void, Void> 
+
+class DataRequestTask extends AsyncTask<Void, Void, Void> 
 {
 @Override
-protected void onPreExecute() 
+protected void onPreExecute( ) 
 {
 super.onPreExecute();
+sendMessageStringToService("Hallway1", "", "2");
 }
 
 @Override
-protected Void doInBackground(Void... params) 
+protected Void doInBackground( Void... params ) 
 {
 try 
 {
@@ -898,22 +927,22 @@ for (int i = 0; i <= 5; i++)
 runOnUiThread(new Runnable() 
 {
 @Override
-public void run() 
+public void run( ) 
 {
 // code to call your service
-if (titleString.getChartDataWasRecieved())
+if (mqttRequestAnswerDataWasReceived)
 {
 toastMessage("!Chart data was received!");
 onBackPressed();
 }
-else if (chartRequestCounter==5)
+else if (dataRequestCounter == 5)
 {
 toastMessage("No connection...");
 onBackPressed();
 }
 else
 {
-chartRequestCounter++;
+dataRequestCounter++;
 }
 }
 });
@@ -928,17 +957,124 @@ return null;
 }
 
 @Override
-protected void onPostExecute(Void result) 
+protected void onPostExecute( Void result ) 
 {
 super.onPostExecute(result);
 }
 }
 
+
+/*class DataRequestTask extends AsyncTask<Void, Void, Void> 
+ {
+ @Override
+ protected void onPreExecute( ) 
+ {
+ super.onPreExecute();
+ }
+ @Override
+ protected String doInBackground( String... params ) 
+ {
+ try 
+ {
+ for (int i = 0; i <= 5; i++) 
+ {
+ runOnUiThread(new Runnable() 
+ {
+ @Override
+ public void run( ) 
+ {
+ // code to call your service
+ if (mqttRequestAnswerDataWasReceived)
+ {
+ mqttRequestAnswerData = "!mqtt data was received!";
+ isDataRequest = true;
+ onBackPressed();
+ }
+ else if (dataRequestCounter == 5)
+ {
+ mqttRequestAnswerData = "No connection...";
+ isDataRequest = true;
+ debugTextView.setText("trey");
+ onBackPressed();
+ }
+ else
+ {
+ dataRequestCounter++;
+ }
+ }
+ });
+ Thread.sleep(3000);
+ }
+ } 
+ catch (InterruptedException e) 
+ {
+ e.printStackTrace();
+ }
+ }
+ @Override
+ protected void onPostExecute( String result ) 
+ {
+ super.onPostExecute(result);
+ }
+ }*/
+
+/*
+ private class GetContacts extends AsyncTask<Void, Void, String>
+ {
+ @Override
+ protected void onPreExecute()
+ {
+ super.onPreExecute();
+ // Showing progress dialog
+ pDialog = new ProgressDialog(MyActivity.this);
+ pDialog.setMessage("Please wait...");
+ pDialog.setCancelable(false);
+ pDialog.show();
+ }
+ @Override
+ protected Void doInBackground(String... arg0)
+ {
+ // Creating service handler class instance
+ ServiceHandler sh = new ServiceHandler();
+ // Making a request to url and getting response
+ String jsonStr = sh.makeServiceCall(url, ServiceHandler.GET);
+ Log.d("Response: ", "> " + jsonStr);
+ if (jsonStr != null)
+ {
+ try
+ {
+ JSONObject jsonObj = new JSONObject(jsonStr);
+ String auth2 = jsonObj.getString("auth");
+ return auth2;
+ }
+ catch (JSONException e)
+ {
+ e.printStackTrace();
+ }
+ }
+ else
+ {
+ Log.e("ServiceHandler", "Couldn't get any data from the url");
+ }
+ return null;
+ }
+ @Override
+ protected void onPostExecute(String auth2)
+ {
+ super.onPostExecute(auth2);
+ // Dismiss the progress dialog
+ if (pDialog.isShowing())
+ pDialog.dismiss();
+ Toast.makeText(getApplicationContext(), "String retrived:" + auth2, Toast.LENGTH_SHORT).show();
+ }
+ }
+ */
+
 //IS NEED????
-public void saveTreeNodesArrayListToJson(View view)
+public void saveTreeNodesArrayListToJson( View view )
 {
 boolean result = JSONHelper.exportToJSON(this, treeNodes);
-if(result)
+if (result)
 {
 Toast.makeText(this, "Nodes data saved to JSON", Toast.LENGTH_LONG).show();
 }
@@ -949,10 +1085,10 @@ Toast.makeText(this, "Can not save nodes to JSON", Toast.LENGTH_LONG).show();
 }
 
 //IS NEED???
-public void getTreeNodesArrayListFromJson(View view)
+public void getTreeNodesArrayListFromJson( View view )
 {
 treeNodes = JSONHelper.importFromJSON(this);
-if(treeNodes!=null)
+if (treeNodes != null)
 {
 Toast.makeText(this, "Nodes data restored from JSON", Toast.LENGTH_LONG).show();
 }
