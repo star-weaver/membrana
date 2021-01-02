@@ -29,12 +29,12 @@ mp.setDisplay(surfaceHolder);
 if (!isPaused)
 {
 //https://developer.android.com/guide/topics/media/mediaplayer#java
-//mp.setDataSource(cameraURL);
+mp.setDataSource(cameraURL);
 //mp.setDataSource(titleString.getVideoLink(cameraNumber));
 //mp.setDataSource("rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov");
 //mp.setDataSource("rtsp://888888:888888@192.168.0.108:554/cam/realmonitor?channel=1&subtype=1");
 //mp.setDataSource("rtsp://192.168.0.108:8554/");
-mp.setDataSource("rtsp://888888:888888@37.57.199.109:554/cam/realmonitor?channel=1&subtype=1"); 
+//mp.setDataSource("rtsp://888888:888888@37.57.199.109:554/cam/realmonitor?channel=1&subtype=1"); 
 //mp.setDataSource("rtsp://3gp-tv2. unwire.dk/livestreaming/tv2/tv2news/tv2news_108k.sdp");
 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() 
 {
