@@ -123,7 +123,7 @@ break;
 case MqttConnectionManagerService.MSG_SET_STRING_VALUE:
 String str1 = msg.getData().getString("str1");
 String str2 = msg.getData().getString("str2");
-if (str1 == "chart")
+if (str1.equals("chart"))
 {//3
 char[] separated = str2.toCharArray();
 lineChartArrayList.clear();
@@ -133,7 +133,7 @@ lineChartArrayList.add(i, Float.valueOf(separated[i]));
 }//4
 titleString.setLineChartArrayList(lineChartArrayList);
 }//3 end of if (str1 == "chart")
-else if (str1 == "mqtt_request_answer_data")
+else if (str1.equals("mqtt_request_answer_data"))
 {//5
 mqttRequestAnswerDataWasReceived = true;
 //titleString.setChartDataWasRecieved(true);
