@@ -249,6 +249,7 @@ disconnectedBuferOptions.setPersistBuffer(false);
 disconnectedBuferOptions.setDeleteOldestMessages(false);
 client.setBufferOpts(disconnectedBuferOptions);
 subscribeToTopic();
+subscribeToTopic1();
 }
 
 @Override
@@ -270,12 +271,33 @@ try
 {
 client.subscribe(subscriptionTopicMultisensor, 0, null, new IMqttActionListener()
 {
-
 @Override
 public void onSuccess(IMqttToken asyncActionToken)
 {
 }
+@Override 
+public void onFailure(IMqttToken asyncActionToken, Throwable exception)
+{
+}
+});
+}
+catch (MqttException ex)
+{
+System.err.println("Exception whilst subscribing");
+ex.printStackTrace();
+}
+}
 
+private void subscribeToTopic1()
+{
+try
+{
+client.subscribe(subscriptionTopicMultisensor, 0, null, new IMqttActionListener()
+{
+@Override
+public void onSuccess(IMqttToken asyncActionToken)
+{
+}
 @Override 
 public void onFailure(IMqttToken asyncActionToken, Throwable exception)
 {
