@@ -934,6 +934,7 @@ if (mqttRequestAnswerDataWasReceived)
 {
 toastMessage("!Chart data was received!");
 onBackPressed();
+cancel(true);
 }
 else if (dataRequestCounter == 5)
 {
